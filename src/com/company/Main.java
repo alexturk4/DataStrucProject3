@@ -95,11 +95,21 @@ class BTree {
 
     void printTree(){
         if (root != null){
-            System.out.println(getRoot().getKeys());
+            recursivePrintTree(root, 0);
             System.out.println();
         }
         else
             System.out.println("The tree is empty");
+    }
+
+    // this does a preorder traversal of the tree
+    void recursivePrintTree(Node rootPtr, int depth) {
+        System.out.println("Depth level " + depth + " " + rootPtr.getKeys());
+
+        System.out.print("Depth level " + (depth + 1) + " ");
+        for (int i = 0; i<rootPtr.getChildren().size(); i++) {
+            System.out.print("|" + rootPtr.getChildren().get(i).getKeys() + "|  ");
+        }
     }
 
 
