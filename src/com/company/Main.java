@@ -56,7 +56,7 @@ class BTree {
 
     private Node recursiveInsert(Node rootPtr, int newKey){
         // if we come upon a node with 3 keys, we must split it
-        if (rootPtr.numKey == 3){
+        if (rootPtr.getNumKey() == 3){
             // split node
             rootPtr = splitNode(rootPtr);
         }
@@ -182,6 +182,7 @@ class Node implements Comparable<Node> {
     }
 
     public int getNumKey() {
+        numKey = this.keys.size();
         return numKey;
     }
 
