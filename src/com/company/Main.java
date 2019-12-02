@@ -64,6 +64,9 @@ class BTree {
         if (!rootPtr.isLeaf) {
             if (newKey > rootPtr.getLargestKey()) {
                 // select the rightmost (max) child
+                if (rootPtr.getLargestChild().getNumKey() == 3){
+                    rootPtr = splitNode(rootPtr, rootPtr.getLargestChild());
+                }
                 recursiveInsert(rootPtr.getLargestChild(), newKey);
             }
             else {
@@ -79,17 +82,40 @@ class BTree {
 
     private Node splitNode(Node ptr){
         ArrayList<Integer> keys = ptr.getKeys();
+        Node newRoot = null;
+        // if we have to split the root node
+            newRoot = new Node(false, keys.get(1));
 
-        // create new root node with the middle key of the node being split
-        Node newRoot = new Node(false, keys.get(1));
+            Node leftNode = new Node(true, keys.get(0));
+            Node rightNode = new Node(true, keys.get(2));
 
-        Node leftNode = new Node(true, keys.get(0));
-        Node rightNode = new Node(true, keys.get(2));
-
-        newRoot.addChild(leftNode);
-        newRoot.addChild(rightNode);
+            newRoot.addChild(leftNode);
+            newRoot.addChild(rightNode);
 
         return newRoot;
+    }
+
+    // used to split a non root node
+    private Node splitNode(Node rootPtr, Node splitNode){
+        Node leftChild = new Node(true);
+        Node rightChild = new Node(true);
+
+        ArrayList<Integer> keys = splitNode.getKeys();
+
+        // add the middle key to the root pointer
+        rootPtr.addKey(keys.get(1));
+
+        // add the smallest key to the left child
+        leftChild.addKey(keys.get(0));
+
+        // add the largest key to the right child
+        rightChild.addKey(keys.get(2));
+
+        rootPtr.deleteChild(splitNode);
+        rootPtr.addChild(leftChild);
+        rootPtr.addChild(rightChild);
+
+        return rootPtr;
     }
 
 
@@ -144,7 +170,7 @@ class Node implements Comparable<Node> {
     // this will add a key
     public void addKey(int key) {
         this.keys.add(key);
-        //this.keys.sort(Comparator.comparingInt(Integer::valueOf));
+        this.keys.sort(Comparator.comparingInt(Integer::valueOf));
         Collections.sort(this.children);
         numKey++;
     }
@@ -154,6 +180,10 @@ class Node implements Comparable<Node> {
         this.children.add(child);
         this.keys.sort(Comparator.comparingInt(Integer::valueOf));
         numKey++;
+    }
+
+    public void deleteChild(Node child){
+        this.children.remove(child);
     }
 
     public int getLargestKey(){
