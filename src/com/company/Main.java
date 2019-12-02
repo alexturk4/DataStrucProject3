@@ -57,8 +57,13 @@ class BTree {
     private Node recursiveInsert(Node rootPtr, int newKey){
         // if we come upon a node with 3 keys, we must split it
         if (rootPtr.getNumKey() == 3){
-            // split node
-            rootPtr = splitNode(rootPtr);
+            // split node with children
+            if (rootPtr.getChildren().size() > 0 ){
+                rootPtr = splitNodeWithChildren(rootPtr);
+            }
+            // split node without any children
+            else
+                rootPtr = splitNode(rootPtr);
         }
         // if our new key is larger than the greatest value in a node and the node is not a leaf, recurse to the right child node
         if (!rootPtr.isLeaf) {
@@ -118,6 +123,39 @@ class BTree {
         return rootPtr;
     }
 
+    private Node splitNodeWithChildren(Node rootPtr) {
+        Node leftChild = new Node(false);
+        Node rightChild = new Node(false);
+        Node newRoot = new Node(false);
+
+        ArrayList<Node> children = rootPtr.getChildren();
+        ArrayList<Integer> keys = rootPtr.getKeys();
+
+        int middleKey = keys.get(1);
+
+        // add the middle key to the root pointer
+        newRoot.addKey(middleKey);
+
+        // add the smallest key to the left child
+        leftChild.addKey(keys.get(0));
+
+        // add the largest key to the right child
+        rightChild.addKey(keys.get(2));
+
+        for (int i = 0; i< children.size(); i++){
+            if (middleKey > Collections.max(children.get(i).getKeys())){
+                leftChild.addChild(children.get(i));
+            }
+            else
+                rightChild.addChild(children.get(i));
+        }
+
+        newRoot.addChild(leftChild);
+        newRoot.addChild(rightChild);
+
+        return newRoot;
+    }
+
 
     void printTree(){
         if (root != null){
@@ -132,9 +170,21 @@ class BTree {
     void recursivePrintTree(Node rootPtr, int depth) {
         System.out.println("Depth level " + depth + " " + rootPtr.getKeys());
 
-        System.out.print("Depth level " + (depth + 1) + " ");
-        for (int i = 0; i<rootPtr.getChildren().size(); i++) {
-            System.out.print("|" + rootPtr.getChildren().get(i).getKeys() + "|  ");
+        if (rootPtr.isLeaf){
+            return;
+        }
+        else {
+            System.out.print("Depth level " + (depth + 1) + " ");
+            for (int i = 0; i<rootPtr.getChildren().size(); i++) {
+                System.out.print("|" + rootPtr.getChildren().get(i).getKeys() + "|  ");
+            }
+
+            System.out.println();
+            System.out.print("Depth level " + (depth + 2) + " ");
+            for (int i = 0; i<rootPtr.getChildren().size(); i++) {
+                for (int j = 0; j < rootPtr.getChildren().get(i).getChildren().size(); j++)
+                    System.out.print("|" + rootPtr.getChildren().get(i).getChildren().get(j).getKeys() + "|  ");
+            }
         }
     }
 
@@ -209,6 +259,10 @@ class Node implements Comparable<Node> {
 
     public ArrayList<Node> getChildren() {
         return children;
+    }
+
+    public void setChildren(ArrayList<Node> children) {
+        this.children = children;
     }
 
     public int getNumKey() {
